@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS nodes (
   width          REAL NOT NULL DEFAULT 360,
   height         REAL NOT NULL DEFAULT 260,
   content        TEXT NOT NULL DEFAULT '',            -- note/idea/task/summary body
-  model          TEXT NOT NULL DEFAULT 'gpt-4o-mini',
+  model          TEXT NOT NULL DEFAULT 'deepseek-chat',
   temperature    REAL NOT NULL DEFAULT 0.7,
   parent_node_id TEXT REFERENCES nodes(id) ON DELETE SET NULL,
   origin         TEXT,                                -- JSON {messageId?, fragment?} branch provenance

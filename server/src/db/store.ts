@@ -111,7 +111,7 @@ export function createNode(input: NodeInput): NodeRow {
     .run(
       id, input.workspace_id, input.type, input.title ?? '',
       input.x ?? 0, input.y ?? 0, input.width ?? 360, input.height ?? 260,
-      input.content ?? '', input.model ?? 'gpt-4o-mini', input.temperature ?? 0.7,
+      input.content ?? '', input.model ?? 'deepseek-chat', input.temperature ?? 0.7,
       input.parent_node_id ?? null, input.origin === undefined ? null : json(input.origin),
       input.context_mode ?? 'current', json(input.context_nodes ?? []), input.collapsed ? 1 : 0
     );
