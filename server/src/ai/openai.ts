@@ -27,11 +27,19 @@ function loadModels(): ModelDef[] {
   }
 }
 
+export interface TransportConfig {
+  apiKey: string | undefined;
+  baseUrl: string;
+  models: ModelDef[];
+  keyName: string;
+}
+
 export class OpenAiProvider implements LlmProvider {
-  readonly id = 'openai';
-  private apiKey: string | undefined;
-  private baseUrl: string;
-  private models: ModelDef[];
+  readonly id: string = 'openai';
+  protected apiKey: string | undefined;
+  protected baseUrl: string;
+  protected models: ModelDef[];
+  protected keyName = 'OPENAI_API_KEY';
 
   constructor() {
     this.apiKey = process.env.OPENAI_API_KEY;
@@ -39,10 +47,18 @@ export class OpenAiProvider implements LlmProvider {
     this.models = loadModels();
   }
 
+  /** Used by subclasses (e.g. DeepSeekProvider) to re-point the transport. */
+  protected setTransport(cfg: TransportConfig) {
+    this.apiKey = cfg.apiKey;
+    this.baseUrl = cfg.baseUrl;
+    this.models = cfg.models;
+    this.keyName = cfg.keyName;
+  }
+
   isConfigured() { return Boolean(this.apiKey); }
 
   missingKeyHint() {
-    return 'OPENAI_API_KEY не задан. Скопируйте .env.example в server/.env и укажите ключ: OPENAI_API_KEY=sk-... , затем перезапустите сервер.';
+    return `${this.keyName} не задан. Скопируйте .env.example в server/.env и укажите ключ: ${this.keyName}=sk-... , затем перезапустите сервер.`;
   }
 
   listModels() { return this.models.map((m) => m.id); }
@@ -70,7 +86,8 @@ export class OpenAiProvider implements LlmProvider {
         body: JSON.stringify({
           model: opts.model,
           messages,
-          temperature: opts.temperature ?? 0.7,
+          // DeepSeek R1 (reasoner) does not support custom temperature/top_p.
+          ...(opts.model.includes('reasoner') ? {} : { temperature: opts.temperature ?? 0.7 }),
           max_tokens: opts.maxTokens ?? 2048,
           stream: true,
           stream_options: { include_usage: true },

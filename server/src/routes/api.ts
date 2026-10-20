@@ -27,7 +27,7 @@ const nodeCreate = z.object({
   width: z.number().positive().max(2000).default(360),
   height: z.number().positive().max(4000).default(260),
   content: z.string().max(MAX_MESSAGE_CHARS).default(''),
-  model: z.string().max(100).default('gpt-4o-mini'),
+  model: z.string().max(100).default('deepseek-chat'),
   temperature: z.number().min(0).max(2).default(0.7),
   parentNodeId: z.string().nullable().default(null),
   origin: z.unknown().nullish(),
@@ -287,7 +287,7 @@ api.post('/synthesize', (req, res) => {
     return `### Узел «${label}» (${n.type})\n${digest}`;
   });
   const prompt = `${input.instruction}\n\nМатериалы:\n\n${blocks.join('\n\n')}`;
-  if (estimateMessagesTokens([{ role: 'user', content: prompt }]) > provider.contextWindow('gpt-4o-mini') - 3000) {
+  if (estimateMessagesTokens([{ role: 'user', content: prompt }]) > provider.contextWindow('deepseek-chat') - 3000) {
     throw httpError(400, 'context_length', 'Выбранные узлы слишком велики для синтеза. Создайте сначала сводки по отдельным веткам.');
   }
 
@@ -324,7 +324,7 @@ api.post('/edges', (req, res) => {
   const input = parse(edgeCreate, req.body);
   const s = store.getNode(input.source), t = store.getNode(input.target);
   if (!s || !t) throw httpError(400, 'bad_edge', 'Оба конца связи должны существовать');
-  res.status(201).json(store.createEdge(input.workspaceId, input.source, input.target, input.kind));
+  res.status(201).json(store.createEdge(input.workspaceId, input.source, input.target, input.kind ?? 'related'));
 });
 
 api.patch('/edges/:id', (req, res) => {
